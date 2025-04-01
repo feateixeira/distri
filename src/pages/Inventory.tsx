@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useDatabase, Product } from '@/contexts/DatabaseContext';
 import {
@@ -36,6 +35,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format, parseISO } from 'date-fns';
+import { LowStockAlert } from '@/components/LowStockAlert';
+import { LowStockBanner } from '@/components/LowStockBanner';
 
 const Inventory: React.FC = () => {
   const { products, inventory, updateInventory, getProduct, getInventoryForProduct } = useDatabase();
@@ -149,9 +150,15 @@ const Inventory: React.FC = () => {
   
   return (
     <div className="space-y-6">
+      {/* Componente de alerta periódico (não visível) */}
+      <LowStockAlert />
+      
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Estoque</h1>
       </div>
+      
+      {/* Banner de alerta para itens com estoque baixo */}
+      <LowStockBanner />
       
       <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
         <div className="relative flex-1">
