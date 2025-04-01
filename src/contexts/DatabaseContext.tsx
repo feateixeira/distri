@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { toast } from "sonner";
 
@@ -55,87 +54,10 @@ interface DatabaseContextType {
 
 const DatabaseContext = createContext<DatabaseContextType | undefined>(undefined);
 
-// Sample data for initial state
-const sampleProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Água Mineral 500ml',
-    barcode: '7891000000001',
-    purchasePrice: 0.75,
-    sellingPrice: 2.00,
-    createdAt: new Date(2023, 0, 15).toISOString(),
-    updatedAt: new Date(2023, 0, 15).toISOString()
-  },
-  {
-    id: '2',
-    name: 'Refrigerante Cola 2L',
-    barcode: '7891000000002',
-    purchasePrice: 4.50,
-    sellingPrice: 7.99,
-    createdAt: new Date(2023, 0, 10).toISOString(),
-    updatedAt: new Date(2023, 1, 5).toISOString()
-  },
-  {
-    id: '3',
-    name: 'Cerveja Lager 350ml',
-    barcode: '7891000000003',
-    purchasePrice: 1.75,
-    sellingPrice: 3.99,
-    createdAt: new Date(2023, 1, 1).toISOString(),
-    updatedAt: new Date(2023, 1, 1).toISOString()
-  }
-];
-
-const sampleInventory: InventoryItem[] = [
-  {
-    id: '1',
-    productId: '1',
-    currentQuantity: 120,
-    minQuantity: 30,
-    maxQuantity: 200,
-    updatedAt: new Date(2023, 0, 15).toISOString()
-  },
-  {
-    id: '2',
-    productId: '2',
-    currentQuantity: 45,
-    minQuantity: 20,
-    maxQuantity: 100,
-    updatedAt: new Date(2023, 1, 5).toISOString()
-  },
-  {
-    id: '3',
-    productId: '3',
-    currentQuantity: 72,
-    minQuantity: 24,
-    maxQuantity: 144,
-    updatedAt: new Date(2023, 1, 1).toISOString()
-  }
-];
-
-const sampleSales: Sale[] = [
-  {
-    id: '1',
-    items: [
-      { productId: '1', quantity: 5, price: 2.00, discount: 0 },
-      { productId: '2', quantity: 2, price: 7.99, discount: 0 }
-    ],
-    total: 25.98,
-    paymentMethod: 'cash',
-    createdAt: new Date(2023, 1, 10).toISOString(),
-    sellerName: 'funcionario'
-  },
-  {
-    id: '2',
-    items: [
-      { productId: '3', quantity: 6, price: 3.99, discount: 2.00 }
-    ],
-    total: 21.94,
-    paymentMethod: 'credit',
-    createdAt: new Date(2023, 1, 15).toISOString(),
-    sellerName: 'funcionario'
-  }
-];
+// Dados iniciais vazios em vez dos dados de amostra
+const sampleProducts: Product[] = [];
+const sampleInventory: InventoryItem[] = [];
+const sampleSales: Sale[] = [];
 
 export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
