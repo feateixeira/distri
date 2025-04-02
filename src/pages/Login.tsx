@@ -43,7 +43,7 @@ const Login: React.FC = () => {
           <div className="flex justify-center mb-4">
             <Store className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Distribuidora de Bebidas</CardTitle>
+          <CardTitle className="text-2xl font-bold">Primus Distribuidora</CardTitle>
           <CardDescription>
             Entre com suas credenciais para acessar o sistema
           </CardDescription>
@@ -89,12 +89,6 @@ const Login: React.FC = () => {
             </Button>
           </CardFooter>
         </form>
-        
-        <div className="p-4 text-center text-sm text-muted-foreground">
-          <p>Usuários para teste:</p>
-          <p className="font-medium">Admin: admin / admin</p>
-          <p className="font-medium">Funcionário: funcionario / 123456</p>
-        </div>
       </Card>
     </div>
   );

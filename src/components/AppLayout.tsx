@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -34,7 +33,7 @@ const Sidebar: React.FC<{ className?: string }> = ({ className }) => {
     <div className={cn("bg-sidebar p-4 flex flex-col h-full", className)}>
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-sidebar-primary">Distri Bebidas</h1>
+          <h1 className="text-2xl font-bold text-sidebar-primary">PRIMUS</h1>
           <p className="text-sidebar-foreground text-sm">Sistema de Gestão</p>
         </div>
         <Toggle

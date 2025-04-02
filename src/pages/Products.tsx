@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useDatabase, Product } from '@/contexts/DatabaseContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -162,37 +161,31 @@ const Products: React.FC = () => {
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Código de Barras</TableHead>
-              <TableHead className="text-right">Preço de Compra (R$)</TableHead>
-              <TableHead className="text-right">Preço de Venda (R$)</TableHead>
-              <TableHead className="text-right">Última Atualização</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
+              <TableHead>Preço de Compra</TableHead>
+              <TableHead>Preço de Venda</TableHead>
+              <TableHead>Última Atualização</TableHead>
+              {isAdmin && <TableHead className="w-[80px]">Ações</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
                 <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{product.name}</TableCell>
                   <TableCell>{product.barcode}</TableCell>
-                  <TableCell className="text-right">
-                    {product.purchasePrice.toFixed(2)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {product.sellingPrice.toFixed(2)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {format(parseISO(product.updatedAt), 'dd/MM/yyyy HH:mm')}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleOpenEditDialog(product)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      {isAdmin && (
+                  <TableCell className="text-right">R$ {product.purchasePrice.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">R$ {product.sellingPrice.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">{format(parseISO(product.updatedAt), 'dd/MM/yyyy HH:mm')}</TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      <div className="flex space-x-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleOpenEditDialog(product)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
                         <Button 
                           variant="ghost" 
                           size="icon" 
@@ -201,9 +194,9 @@ const Products: React.FC = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      )}
-                    </div>
-                  </TableCell>
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             ) : (
