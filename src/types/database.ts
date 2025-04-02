@@ -29,6 +29,7 @@ export interface Sale {
     discount: number;
   }[];
   total: number;
+  totalDiscount?: number;
   paymentMethod: string;
   createdAt: string;
   sellerName: string;

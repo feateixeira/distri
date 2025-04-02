@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useCallback } from 'react';
-import { DatabaseContextType } from '@/types/database';
+import { DatabaseContextType, Sale } from '@/types/database';
 import { useProducts } from '@/hooks/useProducts';
 import { useInventory } from '@/hooks/useInventory';
 import { useSales } from '@/hooks/useSales';

@@ -38,7 +38,8 @@ import {
   CreditCard,
   Banknote,
   Receipt,
-  ArrowRight
+  ArrowRight,
+  PercentIcon
 } from 'lucide-react';
 import { BarcodeScanner } from '@/components/BarcodeScanner';
 import {
@@ -55,7 +56,6 @@ interface CartItem {
   product: Product;
   quantity: number;
   price: number;
-  discount: number;
   total: number;
 }
 
@@ -66,6 +66,7 @@ const Sales: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
+  const [totalDiscount, setTotalDiscount] = useState(0);
   
   // Search products
   const filteredProducts = searchQuery.length > 1 
@@ -109,7 +110,7 @@ const Sales: React.FC = () => {
             return {
               ...item,
               quantity: newQuantity,
-              total: (product.sellingPrice * newQuantity) - item.discount
+              total: product.sellingPrice * newQuantity
             };
           }
           return item;
@@ -123,7 +124,6 @@ const Sales: React.FC = () => {
             product,
             quantity: 1,
             price: product.sellingPrice,
-            discount: 0,
             total: product.sellingPrice
           }
         ];
@@ -155,7 +155,7 @@ const Sales: React.FC = () => {
           return {
             ...item,
             quantity: newQuantity,
-            total: (item.price * newQuantity) - item.discount
+            total: item.price * newQuantity
           };
         }
         return item;
@@ -163,30 +163,47 @@ const Sales: React.FC = () => {
     );
   };
   
-  // Apply discount
-  const applyDiscount = (productId: string, discount: string) => {
-    const parsedDiscount = parseFloat(discount) || 0;
+  // Handle direct quantity input
+  const handleQuantityChange = (productId: string, newQuantity: string) => {
+    // Convert input to number, default to 1 if invalid
+    const quantity = parseInt(newQuantity, 10);
+    
+    if (isNaN(quantity) || quantity <= 0) {
+      return; // Don't update for invalid input
+    }
+    
+    // Check inventory
+    const inventoryItem = getInventoryForProduct(productId);
+    if (inventoryItem && quantity > inventoryItem.currentQuantity) {
+      toast.error(`Estoque insuficiente. Máximo disponível: ${inventoryItem.currentQuantity}`);
+      return;
+    }
     
     setCart(prev => 
       prev.map(item => {
         if (item.productId === productId) {
-          const maxDiscount = item.price * item.quantity;
-          const validDiscount = Math.min(parsedDiscount, maxDiscount);
-          
           return {
             ...item,
-            discount: validDiscount,
-            total: (item.price * item.quantity) - validDiscount
+            quantity,
+            total: item.price * quantity
           };
         }
         return item;
       })
     );
   };
+
+  // Apply discount to total
+  const applyTotalDiscount = (discount: string) => {
+    const parsedDiscount = parseFloat(discount) || 0;
+    const subTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Ensure discount doesn't exceed subtotal
+    setTotalDiscount(Math.min(parsedDiscount, subTotal));
+  };
   
   // Calculate totals
   const subTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const totalDiscount = cart.reduce((sum, item) => sum + item.discount, 0);
   const total = subTotal - totalDiscount;
   
   // Handle checkout
@@ -208,9 +225,10 @@ const Sales: React.FC = () => {
         productId: item.productId,
         quantity: item.quantity,
         price: item.price,
-        discount: item.discount
+        discount: 0 // Individual item discount is now 0
       })),
       total,
+      totalDiscount, // Store the total discount
       paymentMethod,
       sellerName: user?.username || 'unknown'
     };
@@ -219,6 +237,7 @@ const Sales: React.FC = () => {
     
     // Reset cart
     setCart([]);
+    setTotalDiscount(0);
     setIsCheckoutDialogOpen(false);
   };
 
@@ -299,7 +318,6 @@ const Sales: React.FC = () => {
                     <TableHead>Produto</TableHead>
                     <TableHead className="text-center">Qtd</TableHead>
                     <TableHead className="text-right">Preço Unit</TableHead>
-                    <TableHead className="text-right">Desconto</TableHead>
                     <TableHead className="text-right">Total</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
@@ -319,7 +337,13 @@ const Sales: React.FC = () => {
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
-                            <span className="w-8 text-center">{item.quantity}</span>
+                            <Input
+                              type="number"
+                              min="1"
+                              className="w-16 text-center p-1 h-7"
+                              value={item.quantity}
+                              onChange={(e) => handleQuantityChange(item.productId, e.target.value)}
+                            />
                             <Button
                               variant="outline"
                               size="icon"
@@ -332,16 +356,6 @@ const Sales: React.FC = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           R$ {item.price.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            className="w-20 text-right ml-auto"
-                            value={item.discount}
-                            onChange={(e) => applyDiscount(item.productId, e.target.value)}
-                          />
                         </TableCell>
                         <TableCell className="text-right font-medium">
                           R$ {item.total.toFixed(2)}
@@ -360,7 +374,7 @@ const Sales: React.FC = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center">
+                      <TableCell colSpan={5} className="h-24 text-center">
                         Carrinho vazio. Adicione produtos para iniciar uma venda.
                       </TableCell>
                     </TableRow>
@@ -386,9 +400,19 @@ const Sales: React.FC = () => {
               <span className="text-muted-foreground">Subtotal:</span>
               <span>R$ {subTotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Descontos:</span>
-              <span>- R$ {totalDiscount.toFixed(2)}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Desconto:</span>
+              <div className="flex items-center">
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="w-24 text-right mr-2"
+                  value={totalDiscount}
+                  onChange={(e) => applyTotalDiscount(e.target.value)}
+                />
+                <PercentIcon className="h-4 w-4 text-muted-foreground" />
+              </div>
             </div>
             <div className="flex justify-between text-lg font-bold">
               <span>Total:</span>
@@ -466,7 +490,7 @@ const Sales: React.FC = () => {
             </div>
             
             <div className="flex justify-between text-sm">
-              <span>Descontos:</span>
+              <span>Desconto:</span>
               <span>R$ {totalDiscount.toFixed(2)}</span>
             </div>
             
@@ -507,3 +531,4 @@ const Sales: React.FC = () => {
 };
 
 export default Sales;
+
