@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 // Pages
 import Login from "./pages/Login";
@@ -23,45 +24,47 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <DatabaseProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/unauthorized" element={<Unauthorized />} />
-              
-              {/* Protected routes */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route 
-                  path="dashboard" 
+      <ThemeProvider>
+        <AuthProvider>
+          <DatabaseProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/unauthorized" element={<Unauthorized />} />
+                
+                {/* Protected routes */}
+                <Route
+                  path="/"
                   element={
-                    <ProtectedRoute requireAdmin>
-                      <Dashboard />
+                    <ProtectedRoute>
+                      <AppLayout />
                     </ProtectedRoute>
-                  } 
-                />
-                <Route path="produtos" element={<Products />} />
-                <Route path="estoque" element={<Inventory />} />
-                <Route path="vendas" element={<Sales />} />
-              </Route>
-              
-              {/* Catch all */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </DatabaseProvider>
-      </AuthProvider>
+                  }
+                >
+                  <Route index element={<Navigate to="/produtos" replace />} />
+                  <Route 
+                    path="dashboard" 
+                    element={
+                      <ProtectedRoute requireAdmin>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route path="produtos" element={<Products />} />
+                  <Route path="estoque" element={<Inventory />} />
+                  <Route path="vendas" element={<Sales />} />
+                </Route>
+                
+                {/* Catch all */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </DatabaseProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

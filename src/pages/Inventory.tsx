@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
 import { useDatabase, Product } from '@/contexts/DatabaseContext';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
   DialogContent,
@@ -40,6 +42,7 @@ import { LowStockBanner } from '@/components/LowStockBanner';
 
 const Inventory: React.FC = () => {
   const { products, inventory, updateInventory, getProduct, getInventoryForProduct } = useDatabase();
+  const { isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
@@ -54,6 +57,10 @@ const Inventory: React.FC = () => {
   
   // Open update inventory dialog
   const handleOpenUpdateDialog = (product: Product) => {
+    if (!isAdmin) {
+      return; // Only allow admins to update inventory
+    }
+
     setCurrentProduct(product);
     
     // Get current inventory for this product
@@ -76,7 +83,7 @@ const Inventory: React.FC = () => {
   
   // Handle update inventory submit
   const handleUpdateSubmit = () => {
-    if (!currentProduct) return;
+    if (!currentProduct || !isAdmin) return;
     
     updateInventory({
       productId: currentProduct.id,
@@ -196,7 +203,7 @@ const Inventory: React.FC = () => {
               <TableHead className="text-right">Quantidade Máxima</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Última Atualização</TableHead>
-              <TableHead className="w-[80px]">Ações</TableHead>
+              {isAdmin && <TableHead className="w-[80px]">Ações</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -221,20 +228,22 @@ const Inventory: React.FC = () => {
                       'Não atualizado'
                     }
                   </TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => handleOpenUpdateDialog(product)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleOpenUpdateDialog(product)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
+                <TableCell colSpan={isAdmin ? 8 : 7} className="h-24 text-center">
                   Nenhum produto encontrado.
                 </TableCell>
               </TableRow>
@@ -244,65 +253,67 @@ const Inventory: React.FC = () => {
       </div>
       
       {/* Update Inventory Dialog */}
-      <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Atualizar Estoque</DialogTitle>
-            <DialogDescription>
-              {currentProduct && (
-                <>Atualizar estoque para: <strong>{currentProduct.name}</strong></>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="currentQuantity">Quantidade Atual</Label>
-              <Input
-                id="currentQuantity"
-                name="currentQuantity"
-                type="number"
-                min="0"
-                value={formData.currentQuantity}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+      {isAdmin && (
+        <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Atualizar Estoque</DialogTitle>
+              <DialogDescription>
+                {currentProduct && (
+                  <>Atualizar estoque para: <strong>{currentProduct.name}</strong></>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="minQuantity">Quantidade Mínima</Label>
+                <Label htmlFor="currentQuantity">Quantidade Atual</Label>
                 <Input
-                  id="minQuantity"
-                  name="minQuantity"
+                  id="currentQuantity"
+                  name="currentQuantity"
                   type="number"
                   min="0"
-                  value={formData.minQuantity}
+                  value={formData.currentQuantity}
                   onChange={handleInputChange}
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="maxQuantity">Quantidade Máxima</Label>
-                <Input
-                  id="maxQuantity"
-                  name="maxQuantity"
-                  type="number"
-                  min="0"
-                  value={formData.maxQuantity}
-                  onChange={handleInputChange}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="minQuantity">Quantidade Mínima</Label>
+                  <Input
+                    id="minQuantity"
+                    name="minQuantity"
+                    type="number"
+                    min="0"
+                    value={formData.minQuantity}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="maxQuantity">Quantidade Máxima</Label>
+                  <Input
+                    id="maxQuantity"
+                    name="maxQuantity"
+                    type="number"
+                    min="0"
+                    value={formData.maxQuantity}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsUpdateDialogOpen(false)}>
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
-            </Button>
-            <Button onClick={handleUpdateSubmit}>
-              <Save className="h-4 w-4 mr-2" />
-              Salvar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsUpdateDialogOpen(false)}>
+                <X className="h-4 w-4 mr-2" />
+                Cancelar
+              </Button>
+              <Button onClick={handleUpdateSubmit}>
+                <Save className="h-4 w-4 mr-2" />
+                Salvar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
