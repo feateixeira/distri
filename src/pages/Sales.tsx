@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useDatabase, Product } from '@/contexts/DatabaseContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -95,11 +94,44 @@ const Sales: React.FC = () => {
   
   // Handle direct quantity input
   const handleQuantityChange = (productId: string, newQuantity: string) => {
-    // Convert input to number, default to 1 if invalid
     const quantity = parseInt(newQuantity, 10);
     
-    if (isNaN(quantity) || quantity <= 0) {
+    // Allow empty input for backspace/delete operations
+    if (newQuantity === '') {
+      setCart(prev => 
+        prev.map(item => {
+          if (item.productId === productId) {
+            return {
+              ...item,
+              quantity: 0,
+              total: 0
+            };
+          }
+          return item;
+        })
+      );
+      return;
+    }
+    
+    if (isNaN(quantity) || quantity < 0) {
       return; // Don't update for invalid input
+    }
+    
+    // If quantity is 0, keep it but don't check inventory
+    if (quantity === 0) {
+      setCart(prev => 
+        prev.map(item => {
+          if (item.productId === productId) {
+            return {
+              ...item,
+              quantity: 0,
+              total: 0
+            };
+          }
+          return item;
+        })
+      );
+      return;
     }
     
     // Check inventory
@@ -123,10 +155,11 @@ const Sales: React.FC = () => {
     );
   };
 
-  // Apply discount to total
+  // Apply discount to total as currency value
   const applyTotalDiscount = (discount: string) => {
-    const parsedDiscount = parseFloat(discount) || 0;
-    const subTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    // Remove non-numeric characters except for the decimal separator
+    const cleanedDiscount = discount.replace(/[^\d.,]/g, '').replace(',', '.');
+    const parsedDiscount = parseFloat(cleanedDiscount) || 0;
     
     // Ensure discount doesn't exceed subtotal
     setTotalDiscount(Math.min(parsedDiscount, subTotal));

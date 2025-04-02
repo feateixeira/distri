@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, PercentIcon } from 'lucide-react';
+import { ShoppingCart, Receipt } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Banknote, CreditCard, Receipt } from 'lucide-react';
+import { Banknote, CreditCard } from 'lucide-react';
 import { CartItemType } from './CartItem';
 
 interface CheckoutSummaryProps {
@@ -57,17 +57,16 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
           <span>R$ {subTotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-muted-foreground">Desconto:</span>
+          <span className="text-muted-foreground">Desconto (R$):</span>
           <div className="flex items-center">
             <Input
-              type="number"
-              min="0"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
               className="w-24 text-right mr-2"
-              value={totalDiscount}
+              value={totalDiscount.toFixed(2)}
               onChange={(e) => applyTotalDiscount(e.target.value)}
             />
-            <PercentIcon className="h-4 w-4 text-muted-foreground" />
+            <Receipt className="h-4 w-4 text-muted-foreground" />
           </div>
         </div>
         <div className="flex justify-between text-lg font-bold">

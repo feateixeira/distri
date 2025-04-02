@@ -5,7 +5,6 @@ import { TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Minus, Plus, X } from 'lucide-react';
-import { toast } from 'sonner';
 
 export interface CartItemType {
   productId: string;
@@ -30,6 +29,10 @@ export const CartItem: React.FC<CartItemProps> = ({
   onRemove,
   getInventoryForProduct 
 }) => {
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onQuantityChange(item.productId, e.target.value);
+  };
+
   return (
     <TableRow>
       <TableCell className="font-medium">{item.product.name}</TableCell>
@@ -44,11 +47,11 @@ export const CartItem: React.FC<CartItemProps> = ({
             <Minus className="h-3 w-3" />
           </Button>
           <Input
-            type="number"
-            min="1"
+            type="text"
+            inputMode="numeric"
             className="w-16 text-center p-1 h-7"
             value={item.quantity}
-            onChange={(e) => onQuantityChange(item.productId, e.target.value)}
+            onChange={handleQuantityChange}
           />
           <Button
             variant="outline"
